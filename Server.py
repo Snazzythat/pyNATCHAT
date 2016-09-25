@@ -22,7 +22,7 @@ def socketDataRead(remotesocket, addr):
     remotesocket.close()
 
 def socketDataWrite(remotesocket, addr):
-    print 'Reading'
+    print 'Writing'
     while 1:
         content = raw_input('Enter your input:')
         remotesocket.send(content)
