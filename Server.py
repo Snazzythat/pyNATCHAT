@@ -6,29 +6,33 @@ from socket import *
 
 # A simple TCP listener using python sockets
 
-HOST_IP = 'localhost' # listen on local host
-HOST_PORT = 8090  # listen on port 8099
+HOST_IP = '172.20.10.3'  # listen on local host
+HOST_PORT = 9091  # listen on port 8099
 DATA_BUFFER = 4096  # allocation for data buffer coming from socket connection
+MAPPING = {}  # Create empty client dictionary
 
 
-def socketDataRead(remotesocket, addr):
-    while 1:
-        content = remotesocket.recv(DATA_BUFFER)
-        'SocketAdapter --> Handler received data!'
-        if not content:
-            print 'SocketAdapter --> INVALID DATA'
-            break
-        print 'SocketAdapter --> Data received from remote host content: ' + content
-    remotesocket.close()
+def connectClients(client1, client2):
+    client1.send('202')
+    client2.send('202')
+    thread.start_new_thread(clientReadWrite, (client1, client2))
+    thread.start_new_thread(clientReadWrite, (client2, client1))
 
-def socketDataWrite(remotesocket, addr):
-    print 'Reading'
-    while 1:
-        content = raw_input('Enter your input:')
-        remotesocket.send(content)
-        'SocketAdapter --> Handler sent data!'
-        print 'SocketAdapter --> Data sent: ' + content
-    remotesocket.close()
+
+def clientReadWrite(read, write):
+    try:
+        while 1:
+            content = read.recv(DATA_BUFFER)
+            print 'SocketAdapter --> Handler received data!'
+            print str(content)
+            print 'SocketAdapter --> Data received from remote host content: ' + content
+            write.send(content)
+            print 'SocketAdapter --> Data forwarded'
+    except Exception as e:
+        print str(e)
+        read.close()
+        write.close()
+
 
 def setup():
     print 'SocketAdapter --> Setting up socket connection...'
@@ -38,7 +42,7 @@ def setup():
     socketserv.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     print 'SocketAdapter --> Binding local host on port ' + str(HOST_PORT)
     socketserv.bind(LOCATION)
-    socketserv.listen(5)
+    socketserv.listen(20)
     print 'SocketAdapter --> Setting up socket connection...DONE.'
     print 'SocketAdapter --> Listening on port ' + str(HOST_PORT)
     return socketserv
@@ -56,7 +60,25 @@ def runSocketServer():
         except:
             print 'SocketAdapter --> Keyboard Interrupt!'
             sys.exit()
-
         print 'SocketAdapter --> Connection received from: %s' % (remote_address[0])
-        thread.start_new_thread(socketDataRead, (remote_socket, remote_address))
-        thread.start_new_thread(socketDataWrite, (remote_socket, remote_address))
+        thread.start_new_thread(readPin, (remote_socket,))
+        print 'SocketAdapter --> Listening for more connections...'
+
+
+def readPin(socket):
+    socket.send('201')
+    pin = socket.recv(DATA_BUFFER)
+    pin = pin.replace('\n', '')
+    pin = pin.replace('\t', '')
+    pin = pin.replace('\r', '')
+    print 'SocketAdapter --> Pin entered: %s' % pin
+    print str(MAPPING)
+    print '--%s--' % pin
+    if pin in MAPPING.keys():
+        print 'SocketAdapter --> Establishing connection'
+        thread.start_new_thread(connectClients, (MAPPING[pin], socket))
+        del MAPPING[pin]
+    else:
+        print 'SocketAdapter --> Pin -%s- not found, added to mapping' % pin
+        MAPPING[pin] = socket
+        print str(MAPPING)
