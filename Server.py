@@ -6,9 +6,9 @@ from socket import *
 
 # A simple TCP listener using python sockets
 
-HOST_IP = '127.0.0.1'  # listen on local host
-HOST_PORT = 8099  # listen on port 8099
-DATA_BUFFER = 1024  # allocation for data buffer coming from socket connection
+HOST_IP = 'localhost' # listen on local host
+HOST_PORT = 8090  # listen on port 8099
+DATA_BUFFER = 4096  # allocation for data buffer coming from socket connection
 
 
 def socketDataRead(remotesocket, addr):
