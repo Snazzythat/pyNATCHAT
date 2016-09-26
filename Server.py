@@ -6,7 +6,7 @@ from socket import *
 
 # A simple TCP listener using python sockets
 
-HOST_IP = '172.20.10.3'  # listen on local host
+HOST_IP = '192.168.1.129'  # listen on local host
 HOST_PORT = 9091  # listen on port 8099
 DATA_BUFFER = 4096  # allocation for data buffer coming from socket connection
 MAPPING = {}  # Create empty client dictionary
@@ -61,6 +61,7 @@ def runSocketServer():
             print 'SocketAdapter --> Keyboard Interrupt!'
             sys.exit()
         print 'SocketAdapter --> Connection received from: %s' % (remote_address[0])
+        print 'SocketAdapter --> Staring new thread with %s' % (remote_address[0])
         thread.start_new_thread(readPin, (remote_socket,))
         print 'SocketAdapter --> Listening for more connections...'
 
@@ -71,10 +72,11 @@ def readPin(socket):
     pin = pin.replace('\n', '')
     pin = pin.replace('\t', '')
     pin = pin.replace('\r', '')
-    print 'SocketAdapter --> Pin entered: %s' % pin
+    print 'SocketAdapter --> Pin entered: %s' % str(pin)
     print str(MAPPING)
     print '--%s--' % pin
     if pin in MAPPING.keys():
+        print 'SocketAdapter --> Pin -%s- FOUND!' % str(pin)
         print 'SocketAdapter --> Establishing connection'
         thread.start_new_thread(connectClients, (MAPPING[pin], socket))
         del MAPPING[pin]

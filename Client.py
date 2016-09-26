@@ -10,7 +10,7 @@ DATA_BUFFER = 4096
 SUCCESS = 201
 SUCCESS_WITH_CLIENT = 202
 
-def socketDataRead(relay_socket,randomshit):
+def socketDataRead(relay_socket):
     while 1:
         content = relay_socket.recv(DATA_BUFFER)
         if not content:
@@ -21,17 +21,19 @@ def socketDataRead(relay_socket,randomshit):
 
 def socketDataWrite(relay_socket):
     while 1:
+        content = None
         content = raw_input('Enter Message: ')
-        print 'Me:      ' + str(content)
-        relay_socket.send(content)
+        if content:
+            print 'Me:      ' + str(content)
+            relay_socket.send(content)
     relay_socket.close()
 
 def manageChat(relay_socket):
     print 'Client --> Handling Chat!'
     print 'Client --> Handling Read Thread!'
     thread.start_new_thread(socketDataRead,(relay_socket,))
-    print 'Client --> Handling Write Thread!'
-    thread.start_new_thread(socketDataWrite,(relay_socket,))
+    print 'Client --> Handling Write Function!'
+    socketDataWrite,(relay_socket)
 
 
 def handleResponseAndTalk(relay_socket):
