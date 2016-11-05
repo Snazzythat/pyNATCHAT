@@ -1,4 +1,3 @@
-from socket import socket
 import socket
 from socket import *
 import sys
@@ -85,7 +84,7 @@ def initiateRelayConnection(relay_ip, relay_port):
         print 'Client --> Connecting to relay......ESTABLISHED'
         handleConnectionEstablishment(socketWithRelay)
     except Exception as e:
-        print 'Client --> Failed connecting the socket with ' + relay_ip + ' on port ' + relay_port
+        print 'Client --> Failed connecting the socket with ' + str(relay_ip) + ' on port ' + str(relay_port)
         print 'Exception: ' + str(e)
         print 'Client --> Exiting...'
         socketWithRelay.close()
@@ -93,6 +92,8 @@ def initiateRelayConnection(relay_ip, relay_port):
 
 
 def runClient():
+
+
 
     relayAddr = raw_input("Enter Relay's IP address with port (xxx.xxx.xxx.xxx:port):")
     splitSTR = relayAddr.split(':')
