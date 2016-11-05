@@ -6,8 +6,8 @@ from socket import *
 
 # A simple TCP listener using python sockets
 
-HOST_IP = 'localhost'  # listen on local host
-HOST_PORT = 9090  # listen on port 8099
+HOST_IP = '10.0.0.4'  # listen on local host
+HOST_PORT = 9000  # listen on port 8099
 DATA_BUFFER = 4096  # allocation for data buffer coming from socket connection
 MAPPING = {}  # Create empty client dictionary
 
