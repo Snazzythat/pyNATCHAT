@@ -1,4 +1,5 @@
 import socket
+from Utils import *
 from socket import *
 import sys
 import thread
@@ -93,12 +94,9 @@ def initiateRelayConnection(relay_ip, relay_port):
 
 def runClient():
 
-
-
-    relayAddr = raw_input("Enter Relay's IP address with port (xxx.xxx.xxx.xxx:port):")
-    splitSTR = relayAddr.split(':')
-
-    relayIPAddress = splitSTR[0]
-    relayPort = int(splitSTR[1])
-
-    initiateRelayConnection(relayIPAddress, relayPort)
+    sock = createClientSocket(1)
+    connectToServer(sock)
+    pin = raw_input("Enter authentication PIN (4 numbers) to talk to the other person: ")
+    peer = getPeer(sock, pin)
+    print "Peer: %s", peer
+    connectToPeer(sock, peer)
