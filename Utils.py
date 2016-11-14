@@ -4,10 +4,10 @@ from socket import *
 #Utils
 
 class Server:
-    IP_RUN = "10.0.0.4"
-    #IP_RUN = "localhost"
-    IP = "13.68.241.101"
-    #IP = "localhost"
+    #IP_RUN = "10.0.0.4"
+    IP_RUN = "localhost"
+    #IP = "13.68.241.101"
+    IP = "localhost"
     PORT = 9000
     ADDRESS = (IP, PORT)
 
@@ -34,7 +34,7 @@ def getPeer(sock, pin):
         try:
             data, source = sock.recvfrom(4096)
             if data != Codes.CONN_ACK:
-                print "Peer address: %s", data
+                print "Peer address: %s" % data
                 splitSTR = data.split(':')
                 ip = splitSTR[0]
                 port = int(splitSTR[1])

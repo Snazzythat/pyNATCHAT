@@ -36,7 +36,7 @@ def addPin(sock, pin, source):
     if pin in MAPPING.keys():
         print 'SocketAdapter --> Pin -%s- FOUND!' % str(pin)
         print 'SocketAdapter --> Establishing connection'
-        sock.sendto("%s:%d" % (MAPPING[pin][0],MAPPING[pin][1]), source)
+        sock.sendto("%s:%d" % (MAPPING[pin][0], MAPPING[pin][1]), source)
         sock.sendto("%s:%d" % (source[0], source[1]), MAPPING[pin])
         del MAPPING[pin]
     else:

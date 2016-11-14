@@ -1,102 +1,64 @@
-import socket
 from Utils import *
 from socket import *
 import sys
-import thread
+import threading
+from datetime import datetime
+import time
 
 #Client
 
-DATA_BUFFER = 4096
-SUCCESS = 201
-SUCCESS_WITH_CLIENT = 202
+SEND_TIME = 2
+CHECK_TIME = 6
+LAST_CHECK = datetime.now()
 
-def socketDataRead(relay_socket):
+def clientRead(sock):
     while 1:
-        content = relay_socket.recv(DATA_BUFFER)
-        if not content:
-            print 'SocketAdapter --> INVALID DATA'
-            break
-        print 'Recepient:      ' + str(content)
-    relay_socket.close()
+        try:
+            data, source = sock.recvfrom(4096)
+            if data != Codes.CONN_ACK and data != Codes.CONN_REQ and data != Codes.KEEP_ALIVE:
+                print "Peer: %s" % data
+            global LAST_CHECK
+            LAST_CHECK = datetime.now()
+        except timeout:
+            pass
 
-def socketDataWrite(relay_socket):
+def clientWrite(sock, peer):
     while 1:
-        content = None
-        content = raw_input('Enter Message: ')
-        if content:
-            print 'Me:      ' + str(content)
-            relay_socket.send(content)
-    relay_socket.close()
+        try:
+            message = raw_input("")
+            sock.sendto(message, peer)
+        except Exception as e:
+            print e
 
-def manageChat(relay_socket):
-    print 'Client --> Handling Chat!'
-    print 'Client --> Handling Read Thread!'
-    thread.start_new_thread(socketDataRead,(relay_socket,))
-    print 'Client --> Handling Write Function!'
-    socketDataWrite,(relay_socket)
+def keepAlive(sock, peer):
+    while 1:
+        try:
+            time.sleep(SEND_TIME)
+            sock.sendto(Codes.KEEP_ALIVE, peer)
+        except Exception as e:
+            print e
 
-
-def handleResponseAndTalk(relay_socket):
-    client_response = relay_socket.recv(DATA_BUFFER)
-
-    if str(client_response) == str(SUCCESS_WITH_CLIENT):
-        print 'Client --> Successful connection has established!!!'
-        manageChat(relay_socket)
-    else:
-        print 'Client --> Bad response from server!'
-
-
-def promptUserCode(relay_socket):
-    PIN = raw_input("Enter authentication PIN (4 numbers) to talk to the other person: ")
-    print 'Client --> Sending PIN to Relay....'
-    try:
-        relay_socket.send(PIN)
-        print 'Client --> Sending PIN to Relay....DONE. Waiting for other person to respond..'
-    except Exception as e:
-        print 'Client --> Failed to send pin to Relay. Connection will be closed.'
-        relay_socket.close()
-        sys.exit()
-
-    try:
-        handleResponseAndTalk(relay_socket)
-    except Exception as e:
-        print 'Client --> Failed CHAT. Reason: ' + str(e)
-
-
-def handleConnectionEstablishment(relay_socket):
-
-    success_code = relay_socket.recv(DATA_BUFFER)
-
-    if str(SUCCESS) == str(success_code):
-        print 'Client --> Successful connection with Relay! Follow next step.'
-        promptUserCode(relay_socket)
-    else:
-        print 'Client --> Could not receive data on  connection with relay'
-
-
-def initiateRelayConnection(relay_ip, relay_port):
-    print 'Client --> Setting up socket connection with Relay....'
-    locationTuple = (relay_ip, relay_port)
-    socketWithRelay = socket(AF_INET, SOCK_STREAM)
-    #socketWithRelay.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    print 'Client --> Connecting to relay......'
-    try:
-        socketWithRelay.connect(locationTuple)
-        print 'Client --> Connecting to relay......ESTABLISHED'
-        handleConnectionEstablishment(socketWithRelay)
-    except Exception as e:
-        print 'Client --> Failed connecting the socket with ' + str(relay_ip) + ' on port ' + str(relay_port)
-        print 'Exception: ' + str(e)
-        print 'Client --> Exiting...'
-        socketWithRelay.close()
-        sys.exit()
-
+def checkConnStatus():
+    while 1:
+        time.sleep(1)
+        diff = datetime.now() - LAST_CHECK
+        if diff.seconds > CHECK_TIME:
+            print "Disconnected from peer!"
+            print "Exiting program..."
+            sys.exit()
 
 def runClient():
-
     sock = createClientSocket(1)
     connectToServer(sock)
     pin = raw_input("Enter authentication PIN (4 numbers) to talk to the other person: ")
     peer = getPeer(sock, pin)
-    print "Peer: %s", peer
+    print "Connected to Peer: %s" % str(peer)
     connectToPeer(sock, peer)
+    write = threading.Thread(target=clientWrite, args=(sock, peer))
+    write.start()
+    read = threading.Thread(target=clientRead, args=(sock,))
+    read.start()
+    sendStatus = threading.Thread(target=keepAlive, args=(sock, peer))
+    sendStatus.start()
+    checkStatus = threading.Thread(target=checkConnStatus, args=())
+    checkStatus.start()
