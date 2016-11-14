@@ -4,7 +4,9 @@ from socket import *
 #Utils
 
 class Server:
-    IP = "10.0.0.4"
+    IP_RUN = "10.0.0.4"
+    #IP_RUN = "localhost"
+    IP = "13.68.241.101"
     #IP = "localhost"
     PORT = 9000
     ADDRESS = (IP, PORT)
@@ -17,7 +19,7 @@ class Codes:
 
 def createServerSocket():
     socketserv = socket(AF_INET, SOCK_DGRAM)
-    socketserv.bind(Server.ADDRESS)
+    socketserv.bind((Server.IP_RUN, Server.PORT))
     return socketserv
 
 def createClientSocket(timeout):
@@ -56,7 +58,7 @@ def connectToServer(sock):
                 print "Successfully connected to server!"
                 break
         except timeout:
-            print "Attempt %d...", i
+            print "Attempt %d..." % (i+1)
             if i == 2:
                 print "Failed to connect to server!"
                 print "Exiting program..."
@@ -73,8 +75,8 @@ def connectToPeer(sock, peer):
                 print "Successfully connected to peer!"
                 break
         except timeout:
-            print "Attempt %d...", i
-            if i == 2:
-                print "Failed to connect to server!"
+            print "Attempt %d..." % (i+1)
+            if i == 9:
+                print "Failed to connect to peer!"
                 print "Exiting program..."
                 sys.exit()
