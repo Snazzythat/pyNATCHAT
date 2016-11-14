@@ -4,6 +4,7 @@ import sys
 import threading
 from datetime import datetime
 import time
+import os
 
 #Client
 
@@ -45,20 +46,23 @@ def checkConnStatus():
         if diff.seconds > CHECK_TIME:
             print "Disconnected from peer!"
             print "Exiting program..."
-            sys.exit()
+            os._exit(0)
 
 def runClient():
-    sock = createClientSocket(1)
-    connectToServer(sock)
-    pin = raw_input("Enter authentication PIN (4 numbers) to talk to the other person: ")
-    peer = getPeer(sock, pin)
-    print "Connected to Peer: %s" % str(peer)
-    connectToPeer(sock, peer)
-    write = threading.Thread(target=clientWrite, args=(sock, peer))
-    write.start()
-    read = threading.Thread(target=clientRead, args=(sock,))
-    read.start()
-    sendStatus = threading.Thread(target=keepAlive, args=(sock, peer))
-    sendStatus.start()
-    checkStatus = threading.Thread(target=checkConnStatus, args=())
-    checkStatus.start()
+    try:
+        sock = createClientSocket(1)
+        connectToServer(sock)
+        pin = raw_input("Enter authentication PIN (4 numbers) to talk to the other person: ")
+        peer = getPeer(sock, pin)
+        print "Connected to Peer: %s" % str(peer)
+        connectToPeer(sock, peer)
+        write = threading.Thread(target=clientWrite, args=(sock, peer))
+        write.start()
+        read = threading.Thread(target=clientRead, args=(sock,))
+        read.start()
+        sendStatus = threading.Thread(target=keepAlive, args=(sock, peer))
+        sendStatus.start()
+        checkStatus = threading.Thread(target=checkConnStatus, args=())
+        checkStatus.start()
+    except:
+        sys.exit()
