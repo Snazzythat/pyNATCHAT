@@ -4,8 +4,8 @@ from socket import *
 #Utils
 
 class Server:
-    #IP = "13.68.241.101"
-    IP = "localhost"
+    IP = "13.68.241.101"
+    #IP = "localhost"
     PORT = 9000
     ADDRESS = (IP, PORT)
 
